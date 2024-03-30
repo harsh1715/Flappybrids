@@ -2,6 +2,7 @@ import pygame
 import sys
 import random
 import numpy as np
+from pygame.locals import *
 
 # Initialize Pygame
 pygame.init()
@@ -18,6 +19,7 @@ PIPE_COLOR = (0, 128, 0)     # Green
 BACKGROUND_COLOR = (135, 206, 235)  # Sky Blue
 GRAVITY = 0.5
 FLAP_STRENGTH = 10
+BLUR_RADIUS = 15  # Blur radius for optic lens effect
 
 # Create the screen
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -36,10 +38,7 @@ class Bird:
 
     def update(self):
         self.velocity += GRAVITY
-        # Add other forces affecting velocity (e.g., wind resistance)
         self.y += self.velocity
-        # Implement friction here to affect the bird's velocity
-        # Simulate inertia here to adjust the bird's velocity based on external forces
 
     def draw(self):
         pygame.draw.circle(screen, BIRD_COLOR, (self.x, int(self.y)), self.radius)
@@ -72,53 +71,11 @@ class Pipe:
 # Background class
 class Background:
     def __init__(self):
-        self.blur_image = pygame.image.load("blur_background.png").convert()    # Load blur background
-        self.transition_image_1 = pygame.image.load("blur_background1.png").convert()  # Load first transition image
-        self.transition_image_2 = pygame.image.load("blur_background2.png").convert()  # Load second transition image
-        self.transition_image_3 = pygame.image.load("blur_background3.png").convert()  # Load third transition image
-        self.game_image = pygame.image.load("background.png").convert()         # Load game background
-        self.check_dimensions()  # Check and resize if needed
-        self.rect = self.blur_image.get_rect()                                  # Use blur image rect as reference
-        self.transition_duration = 60  # Duration of each transition frame
-        self.transition_frame = 0        # Current frame of the transition
+        self.image = pygame.image.load("background.png").convert()
+        self.rect = self.image.get_rect()
 
-    def check_dimensions(self):
-        if (
-            self.blur_image.get_size() != self.game_image.get_size()
-            or self.blur_image.get_size() != self.transition_image_1.get_size()
-            or self.blur_image.get_size() != self.transition_image_2.get_size()
-            or self.blur_image.get_size() != self.transition_image_3.get_size()
-        ):
-            raise ValueError("Background images have different dimensions!")
-
-    def draw(self, game_started):
-        if game_started and self.transition_frame < self.transition_duration:
-            # Calculate alpha value for transition
-            alpha = int(255 * self.transition_frame / self.transition_duration)
-            # Draw transition image with alpha blending
-            if self.transition_frame < self.transition_duration // 4:
-                self.blur_image.set_alpha(255 - alpha)
-                screen.blit(self.blur_image, self.rect)
-            elif self.transition_frame < self.transition_duration // 2:
-                self.transition_image_1.set_alpha(alpha)
-                screen.blit(self.transition_image_1, self.rect)
-            elif self.transition_frame < self.transition_duration * 3 // 4:
-                self.transition_image_2.set_alpha(255 - alpha)
-                screen.blit(self.transition_image_2, self.rect)
-            else:
-                self.transition_image_3.set_alpha(alpha)
-                screen.blit(self.transition_image_3, self.rect)
-            self.transition_frame += 1
-        else:
-            if game_started:
-                screen.blit(self.game_image, self.rect)  # Draw game background
-            else:
-                screen.blit(self.blur_image, self.rect)  # Draw blur background
-
-
- 
-
-
+    def draw(self):
+        screen.blit(self.image, self.rect)
 
 # Button class for start button
 class Button:
@@ -158,6 +115,15 @@ def circle_rect_collision(circle_pos, circle_radius, rect):
     closest_y = max(rect.top, min(circle_pos[1], rect.bottom))
     distance_squared = (circle_pos[0] - closest_x) ** 2 + (circle_pos[1] - closest_y) ** 2
     return distance_squared < circle_radius ** 2
+
+# Apply blur optic lens effect
+def apply_blur_effect(surface, radius):
+    rect = surface.get_rect()
+    sub = surface.subsurface(rect)
+    sub = pygame.transform.smoothscale(sub, (rect.width // 10, rect.height // 10))
+    sub = pygame.transform.smoothscale(sub, (rect.width, rect.height))
+    sub.set_alpha(150)
+    surface.blit(sub, rect)
 
 # Main function
 def main():
@@ -213,19 +179,20 @@ def main():
                 game_over = True
 
         screen.fill(BACKGROUND_COLOR)
-        background.draw(game_started)  # Pass game_started flag to draw method
+        background.draw()
         bird.draw()
 
         for pipe in pipes:
             pipe.draw()
 
-        # Draw start button if game hasn't started
+        # Apply blur effect if game hasn't started
         if not game_started:
+            apply_blur_effect(screen, BLUR_RADIUS)
             start_button.draw()
 
         pygame.display.flip()
         clock.tick(60)
 
-
 if __name__ == "__main__":
     main()
+ 
