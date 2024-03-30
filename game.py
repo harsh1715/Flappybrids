@@ -36,7 +36,10 @@ class Bird:
 
     def update(self):
         self.velocity += GRAVITY
+        # Add other forces affecting velocity (e.g., wind resistance)
         self.y += self.velocity
+        # Implement friction here to affect the bird's velocity
+        # Simulate inertia here to adjust the bird's velocity based on external forces
 
     def draw(self):
         pygame.draw.circle(screen, BIRD_COLOR, (self.x, int(self.y)), self.radius)
@@ -69,11 +72,70 @@ class Pipe:
 # Background class
 class Background:
     def __init__(self):
-        self.image = pygame.image.load("background.png").convert()
-        self.rect = self.image.get_rect()
+        self.blur_image = pygame.image.load("blur_background.png").convert()    # Load blur background
+        self.transition_image_1 = pygame.image.load("blur_background1.png").convert()  # Load first transition image
+        self.transition_image_2 = pygame.image.load("blur_background2.png").convert()  # Load second transition image
+        self.transition_image_3 = pygame.image.load("blur_background3.png").convert()  # Load third transition image
+        self.game_image = pygame.image.load("background.png").convert()         # Load game background
+        self.check_dimensions()  # Check and resize if needed
+        self.rect = self.blur_image.get_rect()                                  # Use blur image rect as reference
+        self.transition_duration = 60  # Duration of each transition frame
+        self.transition_frame = 0        # Current frame of the transition
+
+    def check_dimensions(self):
+        if (
+            self.blur_image.get_size() != self.game_image.get_size()
+            or self.blur_image.get_size() != self.transition_image_1.get_size()
+            or self.blur_image.get_size() != self.transition_image_2.get_size()
+            or self.blur_image.get_size() != self.transition_image_3.get_size()
+        ):
+            raise ValueError("Background images have different dimensions!")
+
+    def draw(self, game_started):
+        if game_started and self.transition_frame < self.transition_duration:
+            # Calculate alpha value for transition
+            alpha = int(255 * self.transition_frame / self.transition_duration)
+            # Draw transition image with alpha blending
+            if self.transition_frame < self.transition_duration // 4:
+                self.blur_image.set_alpha(255 - alpha)
+                screen.blit(self.blur_image, self.rect)
+            elif self.transition_frame < self.transition_duration // 2:
+                self.transition_image_1.set_alpha(alpha)
+                screen.blit(self.transition_image_1, self.rect)
+            elif self.transition_frame < self.transition_duration * 3 // 4:
+                self.transition_image_2.set_alpha(255 - alpha)
+                screen.blit(self.transition_image_2, self.rect)
+            else:
+                self.transition_image_3.set_alpha(alpha)
+                screen.blit(self.transition_image_3, self.rect)
+            self.transition_frame += 1
+        else:
+            if game_started:
+                screen.blit(self.game_image, self.rect)  # Draw game background
+            else:
+                screen.blit(self.blur_image, self.rect)  # Draw blur background
+
+
+ 
+
+
+
+# Button class for start button
+class Button:
+    def __init__(self, x, y, width, height, color, text):
+        self.rect = pygame.Rect(x, y, width, height)
+        self.color = color
+        self.text = text
+        self.font = pygame.font.Font(None, 36)
+        self.text_render = self.font.render(text, True, (255, 255, 255))
+        self.text_rect = self.text_render.get_rect(center=self.rect.center)
 
     def draw(self):
-        screen.blit(self.image, self.rect)
+        pygame.draw.rect(screen, self.color, self.rect)
+        screen.blit(self.text_render, self.text_rect)
+
+    def is_clicked(self, pos):
+        return self.rect.collidepoint(pos)
 
 # Check collision between bird and pipes
 def check_collision(bird, pipes):
@@ -102,10 +164,12 @@ def main():
     bird = Bird(100, SCREEN_HEIGHT // 2)
     background = Background()
     pipes = []
+    start_button = Button(SCREEN_WIDTH // 2 - 50, SCREEN_HEIGHT // 2, 100, 50, (0, 0, 255), "Start")
 
     clock = pygame.time.Clock()
     frame_count = 0
     game_over = False
+    game_started = False
 
     while not game_over:
         for event in pygame.event.get():
@@ -114,40 +178,54 @@ def main():
                 sys.exit()
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
-                    bird.flap()
+                    if game_started:
+                        bird.flap()
+                    else:
+                        game_started = True
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                if not game_started:
+                    mouse_pos = pygame.mouse.get_pos()
+                    if start_button.is_clicked(mouse_pos):
+                        game_started = True
 
-        bird.update()
+        if game_started:
+            bird.update()
 
-        # Exit game if bird drops below the screen
-        if bird.y + bird.radius > SCREEN_HEIGHT:
-            game_over = True
+            # Exit game if bird drops below the screen
+            if bird.y + bird.radius > SCREEN_HEIGHT:
+                game_over = True
 
-        # Add pipes
-        frame_count += 1
-        if frame_count % 100 == 0:
-            new_pipe = Pipe(SCREEN_WIDTH)
-            pipes.append(new_pipe)
+            # Add pipes
+            frame_count += 1
+            if frame_count % 100 == 0:
+                new_pipe = Pipe(SCREEN_WIDTH)
+                pipes.append(new_pipe)
 
-        # Update pipes
-        for pipe in pipes:
-            pipe.move()
+            # Update pipes
+            for pipe in pipes:
+                pipe.move()
 
-        # Remove off-screen pipes
-        pipes = [pipe for pipe in pipes if pipe.x + PIPE_WIDTH > 0]
+            # Remove off-screen pipes
+            pipes = [pipe for pipe in pipes if pipe.x + PIPE_WIDTH > 0]
 
-        # Check collision
-        if check_collision(bird, pipes):
-            game_over = True
+            # Check collision
+            if check_collision(bird, pipes):
+                game_over = True
 
         screen.fill(BACKGROUND_COLOR)
-        background.draw()
+        background.draw(game_started)  # Pass game_started flag to draw method
         bird.draw()
 
         for pipe in pipes:
             pipe.draw()
 
+        # Draw start button if game hasn't started
+        if not game_started:
+            start_button.draw()
+
         pygame.display.flip()
         clock.tick(60)
+
 
 if __name__ == "__main__":
     main()
