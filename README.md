@@ -17,21 +17,7 @@ When you run the program, the first screen you will see is the introduction scre
 
 ![Welcome_Screen](https://github.com/harsh1715/Flappybrids/blob/main/Welcome_Screen.png)
 
-    1) Press the spacebar to flap the bird's wings and navigate through the pipes.
-
-    2) Your goal is to pass through as many pipes as possible without colliding with them.
-
-    3) Each successful pass through a pair of pipes earns you one point.
-
-    4) Be cautious! If the bird touches the sky, ground or the pipes, the game is over.
-
-    5) Easy Mode features pipes with randomly spaced gaps, providing a simpler gameplay experience. 
-
-    6) If you choose hard mode, the pipes dynamically move up and down, altering the gaps between them, offering a more challenging gameplay.
-
-
-              Select the game difficulty mode in the next window
-
+ 
 The Next Screen will prompt you to choose the difficulity you would like to do. Between Easy Mode and Hard Mode<br>
 
 #### Remember!
