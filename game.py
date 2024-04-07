@@ -16,7 +16,6 @@ PIPE_SPEED = 5
 BIRD_COLOR = (255, 255, 0)
 PIPE_COLOR = (0, 128, 0)
 BACKGROUND_COLOR = (135, 206, 235)
-GRAVITY = 0.5
 FLAP_STRENGTH = 5
 BLUR_RADIUS = 15
 WHITE = (255, 255, 255)
@@ -159,7 +158,7 @@ def introduction_screen():
 
 3) Each successful pass through a pair of pipes earns you one point.
 
-4) Be cautious! If the bird touches the ground or the pipes, the game is over.
+4) Be cautious! If the bird touches the sky, ground or the pipes, the game is over.
 
 5) Easy Mode features pipes with randomly spaced gaps, providing a simpler gameplay experience. 
 
@@ -288,7 +287,7 @@ def main():
             if game_started:
                 bird.update()
 
-                if bird.y + bird.radius > SCREEN_HEIGHT:
+                if bird.y + bird.radius > SCREEN_HEIGHT or bird.y - bird.radius < 0:
                     game_over = True
 
                 frame_count += 1
