@@ -14,6 +14,9 @@ Simulation and Modeling Project Implementation of Flappy Birds
 ## How To Play the Game
 When you run the program, the first screen you will see is the introduction screen greeting you. Along with the rules of the game.
 
+
+![Welcome_Screen](https://github.com/harsh1715/Flappybrids/blob/main/Welcome_Screen.png)
+
     1) Press the spacebar to flap the bird's wings and navigate through the pipes.
 
     2) Your goal is to pass through as many pipes as possible without colliding with them.
