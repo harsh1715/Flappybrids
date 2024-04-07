@@ -29,10 +29,17 @@ If you let the bird hit the window boundaries (top or bottom) or you end up runn
 ### Easy Mode
 To select Easy Mode, click the button on the screen.
 
+![Easy_Mode](https://github.com/harsh1715/Flappybrids/blob/main/Easy_Mode.gif)
+
 In Easy Mode. You will encounter something similar to the classic game of Flappy Birds. With randomly spaced gap sizes and fixed pipe positions. This allows for a predictable and manageable challenge for players. 
 
 
 ### Hard Mode
 To select Hard Mode, click the button on the screen.
 
+![Hard_Mode](https://github.com/harsh1715/Flappybrids/blob/main/Hard_Mode.gif)
+
 The Hard mode enhances the functionality of the Easy mode by introducing vertical movement to the pipes and dynamically adjusting the gap size between them. 
+
+### Note
+Gameplay is a lot more smoother than it seems on the Gifs
